@@ -1,15 +1,16 @@
 # AltServer-Linux (updated-libs fork)
 
-Linux port of AltServer with an updated dependency stack and USB/Wi-Fi install-path fixes.
+Linux port of AltServer with an updated dependency stack, USB/Wi-Fi install-path fixes, and iOS 26.4+ signing support.
 
 Base reference: `NyaMisty/AltServer-Linux` branch `new` (`78764512`).
 
 ## What changed vs `NyaMisty/new`
 
-- Dependency refresh to current stable tags (`libplist`, `libusbmuxd`, `libimobiledevice`, `ideviceinstaller`, `libimobiledevice-glue`) and an updated `upstream_repo` develop snapshot (`2ef20b38db9c`).
+- Dependency refresh to current stable tags (`libplist`, `libusbmuxd`, `libimobiledevice`, `ideviceinstaller`, `libimobiledevice-glue`) and an updated `upstream_repo` fork snapshot.
 - Additional runtime fixes applied on top of latest upstream:
   - USB-first with automatic netmuxd fallback in `DeviceManager`.
   - Single-file IPA staging for faster `Writing to device...`.
+  - `rcodesign` signing path for apps that crash on launch with ldid signatures on iOS 26.4+.
   - Optional system `afcclient` fast path for large USB payloads.
   - `[WRITE]` progress/speed telemetry (begin/progress/done with MB/s).
   - Notification proxy timing improvements in `libimobiledevice`.
@@ -26,7 +27,7 @@ Base reference: `NyaMisty/AltServer-Linux` branch `new` (`78764512`).
 - `libraries/libimobiledevice`: `1.4.0` + datspike fork `master` patches
 - `libraries/ideviceinstaller`: `1.2.0` (`1762d5f12fc5`)
 - `libraries/libimobiledevice-glue`: `1.3.2` (`aef2bf0f5bfe`)
-- `upstream_repo`: `2ef20b38db9c` + datspike fork `master` patches
+- `upstream_repo`: datspike fork `master` (`701cd43`)
 
 ## Fast start
 
@@ -38,6 +39,9 @@ scripts/altstore-linux.sh bootstrap
 
 # 2) (Optional) Refresh AltStore IPA to latest release
 scripts/altstore-linux.sh download-altstore
+
+# Required for iOS 26.4+ signing if rcodesign is not on PATH
+export ALTSERVER_RCODESIGN="$HOME/.local/bin/rcodesign"
 
 # 3) Install AltStore to iPhone (password prompt with `-`)
 scripts/altstore-linux.sh install \
@@ -55,6 +59,8 @@ scripts/altstore-linux.sh daemon --debug-level 0
 
 After first install, open iOS Settings and trust the developer app/profile, then try installing any test IPA from AltStore.
 
+For iOS 26.4+, install `rcodesign` (`apple-codesign`) from <https://github.com/indygreg/apple-platform-rs/releases> and either put it on `PATH` or set `ALTSERVER_RCODESIGN`.
+
 Wi-Fi install/refresh is expected when prerequisites are met:
 - device is already paired/trusted with this host (usually first pairing via USB);
 - iPhone and Linux host are on the same network;
@@ -63,6 +69,7 @@ Wi-Fi install/refresh is expected when prerequisites are met:
 
 ## Verified devices
 
+- iPhone18,1 (`iOS 26.5.1`, AltStore 2.2.1)
 - iPhone 17 Pro (`iOS 26.3`)
 - iPhone 13 Pro (`iOS 26.2.1`)
 
@@ -168,6 +175,7 @@ scripts/device-bench.sh install-altstore \
 
 ## Runtime env vars
 
+- `ALTSERVER_RCODESIGN`: path to `rcodesign`/`apple-codesign` for iOS 26.4+ compatible signing.
 - `ALTSERVER_ANISETTE_SERVER`: custom anisette endpoint.
 - `ALTSERVER_ANISETTE_SERVERS`: fallback list of anisette endpoints (`url1,url2,...`; also supports `;` and spaces).
 - `ALTSERVER_DATA_DIR`: override AltServer data directory (default: `~/.altserver`).
