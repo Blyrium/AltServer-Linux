@@ -1,8 +1,8 @@
-# AGENTS.md (src/)
+# AGENTS.md (`src/`)
 
-Rules for `src/` overrides:
+`src/` содержит Linux-замены для исходников из `upstream_repo/AltServer`. Перед правкой сверить соответствующий upstream-файл и вызывающие места.
 
-- Keep overrides narrowly Linux-specific.
-- Preserve upstream behavior unless change is intentional and documented.
-- Prefer adding small compatibility shims over rewriting larger flows.
-- When fixing runtime issues, include a concise reproduction note in commit/PR text.
+- Держать изменения узко Linux-specific и сохранять upstream-поведение, если изменение поведения не является целью.
+- Предпочитать маленький override или compatibility shim большому переписыванию flow.
+- Для Anisette, install, transport, mux и AFC/write path описывать reproduction/проверку в commit или PR notes.
+- В логах и примерах не печатать секреты, UDID и локальные пути.

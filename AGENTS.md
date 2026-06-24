@@ -1,68 +1,36 @@
 # AGENTS.md — AltServer-Linux
 
-Project-level rules for coding agents working in this repository.
+## Старт сессии
 
-## Opening moves (always)
+1. Выполнить `git status -sb`; отметить текущую ветку, целевой base/target если задан, и существующие незакоммиченные изменения.
+2. Перед нетривиальными правками прочитать `README.md` и `CONTRIBUTING.md`; для подпапок дополнительно читать ближайший `AGENTS.md`.
+3. Если задача затрагивает submodules: выполнить `git submodule status --recursive`; при грязном submodule проверить его `git status` и не нормализовать без команды пользователя.
 
-1. `git status -sb`
-2. Confirm active branch and target (`updated-libs`, feature branch, etc.).
-3. Read `README.md` and `CONTRIBUTING.md` before non-trivial changes.
-4. For submodule work, run `git submodule status --recursive`.
+## Инвариант проекта
 
-## Scope and intent
+Это Linux-порт AltServer поверх `upstream_repo`. Изменения должны легко отделяться от upstream и переноситься дальше: меньше слоёв, меньше переписывания, понятный diff.
 
-- This repo is a Linux port that tracks upstream, then layers minimal Linux-focused changes.
-- Optimize for clean history and easy future PRs to upstream projects.
-- Prefer targeted fixes over broad refactors.
+Обычные зоны правок: `src/`, `shims/`, `makefiles/`, `scripts/`, документация. Не менять `libraries/*` и `upstream_repo` без явной задачи на submodule/upstream-правку; сначала искать решение в `src/`, `shims/` или правилах rewrite в `makefiles/`.
 
-## Change boundaries
+## Если задача затрагивает submodules
 
-- Preferred edit areas: `src/`, `shims/`, `makefiles/`, docs.
-- Avoid direct source edits inside submodules unless explicitly requested.
-- If upstream behavior must change, document rationale and keep patch minimal.
+- `libraries/*`: только стабильные теги, без `rc`, `beta`, `alpha`.
+- `upstream_repo`: явный SHA целевого upstream.
+- Не оставлять dirty state или локальные detached-коммиты внутри submodules.
+- Патч библиотеки — только если workaround в этом repo невозможен; дальше public fork и отдельный gitlink commit.
 
-## Submodule policy (strict)
+## Проверки
 
-- `libraries/*`: pin to stable tags (no pre-release tags).
-- `upstream_repo`: pin to explicit SHA (usually `origin/develop` target).
-- No local-only detached commits in submodules.
-- If library fix is unavoidable:
-  - first try workaround in this repo;
-  - otherwise use public fork + explicit gitlink commit.
+- Код или сборка: выполнить базовую сборку из `README.md` / `CONTRIBUTING.md`.
+- Dependencies, `buildenv/` или платформенные флаги: выполнить Docker/CI-сборку либо явно написать, почему она не запускалась.
+- Install, transport, mux или AFC/write path (`Writing to device...`): выполнить device matrix из `CONTRIBUTING.md`; указать USB/Wi‑Fi, `usbmuxd`/`netmuxd` и скорость в `MB/s = bytes / seconds / 1_000_000`.
+- Для замеров сначала пробовать `scripts/device-bench.sh`.
+- iOS trust/developer prompts считать ручными; не имитировать их автоматизацией.
 
-## Build and validation
+## Безопасность и артефакты
 
-Primary build:
+Не коммитить секреты, pairing/provisioning материалы и сгенерированные артефакты; точный список — в `.gitignore` и `CONTRIBUTING.md`. Перед публикацией логов редактировать UDID, Apple account и локальные пути.
 
-```bash
-git submodule update --init --recursive
-mkdir -p build && cd build
-make -f ../Makefile -j3
-```
+## Коммиты и PR
 
-Device regression baseline (when touching install/transport flow):
-
-- AltStore install over USB.
-- IPA install over USB and Wi-Fi.
-- Verify mux path selection (usbmuxd vs netmuxd).
-- Track throughput in `MB/s` with explicit formula and test sample size.
-
-Human-in-the-loop checkpoints (trust dialogs, developer confirmation on iOS) are expected; do not fake automation for those steps.
-
-## Commits and reviewability
-
-- Use Conventional Commits.
-- Keep commits small and logically scoped.
-- Separate docs / build / runtime behavior changes into distinct commits.
-- Include short test evidence in commit or PR notes.
-
-## Security and artifact hygiene
-
-Never commit secrets, credentials, provisioning files, pairing material, or bulky generated artifacts.
-See `.gitignore` and `CONTRIBUTING.md` for exact categories.
-
-## Documentation quality
-
-- Keep rules concise and stable (avoid task-specific noise).
-- Use file references instead of copying long code snippets.
-- If a decision is non-trivial and likely to recur, add/update docs rather than embedding ad-hoc notes in commit messages.
+Если готовишь commit/PR: Conventional Commits, малые логические изменения, отдельно docs/build/runtime, краткая проверка в описании. Если нужная device-проверка не выполнена, написать это явно.

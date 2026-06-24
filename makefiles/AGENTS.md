@@ -1,8 +1,9 @@
-# AGENTS.md (makefiles/)
+# AGENTS.md (`makefiles/`)
 
-Rules for build-system changes:
+`makefiles/` собирает локальные библиотеки, shims и patched upstream sources; маленькая правка здесь может изменить весь сгенерированный build output.
 
-- Keep build edits minimal and architecture-safe.
-- Prefer deterministic flags and explicit include/link updates.
-- Avoid hidden behavior changes in rewrite scripts without documenting intent.
-- Any performance flag change must be validated by at least one successful build.
+- Делать минимальные правки без скрытой привязки к архитектуре; include/link/flag изменения должны быть явными и детерминированными.
+- Не менять release/debug семантику скрыто: release по умолчанию, `DEBUG=1` opt-in.
+- Rewrite-скрипты менять только точечно; если меняется поведение, а не только компиляция, описать причину.
+- Любое изменение performance flags подтверждать хотя бы одной успешной сборкой.
+- Не коммитить `build/`, `*_patched/`, `.a` и прочие сгенерированные артефакты.
