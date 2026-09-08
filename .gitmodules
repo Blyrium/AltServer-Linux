@@ -1,6 +1,6 @@
 [submodule "AltServer-Windows"]
 	path = upstream_repo
-	url = https://github.com/datspike/AltServer-Windows
+	url = https://github.com/Blyrium/AltServer-Windows
 	branch = master
 [submodule "libraries/libplist"]
 	path = libraries/libplist
